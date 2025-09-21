@@ -1,0 +1,59 @@
+services:
+  code-server:
+    image: lscr.io/linuxserver/code-server:latest
+    container_name: code-server
+    logging:
+      driver: "${LOG_DRIVER}"
+      options:
+        max-file: "${LOG_OPT_MAXF}"
+        max-size: "${LOG_OPT_MAXS}"
+    restart: restart
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - PASSWORD=ghkdxowk1!
+      - SUDO_PASSWORD=bam1324
+      - PROXY_DOMAIN=code.devspoon.com
+      - DEFAULT_WORKSPACE=/config/workspace
+      - PWA_APPNAME=code-server
+    volumes:
+      # 설정 및 워크스페이스 폴더
+      - ./config/code-server/:/config/
+      # 프로젝트 폴더 연동
+      - ./projects/:/config/workspace/
+      - ./backup/code/:/backup/
+    networks:
+      - web-network
+    expose:
+      - "8443"
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx-proxy
+    restart: restart
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # nginx 설정 파일
+      - ./nginx/conf.d/:/etc/nginx/conf.d/
+      - ./nginx/nginx_conf/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/proxy_params/proxy_params:/etc/nginx/proxy_params
+      # nginx 로그
+      - ./log/nginx/:/log/
+      # SSL 인증서 (사용자 직접 설정)
+      - ./ssl/certs/:/etc/ssl/certs/
+      - ./ssl/letsencrypt/:/etc/letsencrypt/
+      - ./script/certbot_renew.sh:/usr/local/bin/certbot_renew.sh
+      - ./script/:/script/
+      - ./projects/:/projects/
+      - ./backup/nginx/:/backup/
+    networks:
+      - web-network
+    depends_on:
+      - code-server
+
+networks:
+  web-network:
+    driver: bridge
