@@ -53,7 +53,7 @@ services:
       - ./ssl/letsencrypt/:/etc/letsencrypt/
       - ./script/certbot_renew.sh:/usr/local/bin/certbot_renew.sh
       - ./script/:/script/
-      - ./projects/certbot/:/var/www/certbot/
+      - ./projects/certbot/:/www/certbot/
       - ./backup/nginx/:/backup/
     networks:
       - web-network
