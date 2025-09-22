@@ -47,7 +47,7 @@ services:
       - ./nginx/nginx_conf/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/proxy_params/proxy_params:/etc/nginx/proxy_params
       # nginx 로그
-      - ./log/nginx/:/log/
+      - ./log/nginx/:/log/nginx/
       # SSL 인증서 (사용자 직접 설정)
       - ./ssl/certs/:/etc/ssl/certs/
       - ./ssl/letsencrypt/:/etc/letsencrypt/
