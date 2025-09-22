@@ -7,7 +7,7 @@ services:
       options:
         max-file: "${LOG_OPT_MAXF}"
         max-size: "${LOG_OPT_MAXS}"
-    restart: restart
+    restart: always
     environment:
       - PUID=1000
       - PGID=1000
@@ -27,11 +27,17 @@ services:
       - web-network
     expose:
       - "8443"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8443"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   nginx:
     image: nginx:latest
     container_name: nginx-proxy
-    restart: restart
+    restart: always
     ports:
       - "80:80"
       - "443:443"
@@ -47,12 +53,19 @@ services:
       - ./ssl/letsencrypt/:/etc/letsencrypt/
       - ./script/certbot_renew.sh:/usr/local/bin/certbot_renew.sh
       - ./script/:/script/
-      - ./projects/:/projects/
+      - ./projects/certbot/:/var/www/certbot/
       - ./backup/nginx/:/backup/
     networks:
       - web-network
     depends_on:
-      - code-server
+      code-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
 networks:
   web-network:
